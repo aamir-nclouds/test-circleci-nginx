@@ -12,6 +12,9 @@ jobs:
             sudo apt-get -y -qq install awscli
             sudo apt-get install python3-pip
             sudo pip3 install --upgrade awscli
+            sudo service docker status
+            sudo service docker start
+            docker --version
       - run:
           name: Configure AWS
           command: |
