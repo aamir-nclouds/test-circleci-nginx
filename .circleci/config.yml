@@ -35,7 +35,6 @@ jobs:
             docker push "${AWS_ACCOUNT_ID}".dkr.ecr."{AWS_REGION}".amazonaws.com/"${AWS_ECR_REPO_NAME}":"${AWS_ECR_IMAGE_TAG}"
 
 
-
 # Orchestrate or schedule a set of jobs
 workflows:
   version: 2
