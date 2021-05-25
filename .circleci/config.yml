@@ -1,13 +1,48 @@
 # Use the latest 2.1 version of CircleCI pipeline process engine. See: https://circleci.com/docs/2.0/configuration-reference
 version: 2.1
 # Use a package of configuration called an orb.
-orbs:
-  # Declare a dependency on the welcome-orb
-  welcome: circleci/welcome-orb@0.4.1
+jobs:
+  build-and-push-image:
+    docker:
+      - image: cimg/base:2021.05
+    steps:
+      - checkout
+      - run:
+          name: Install AWS CLI
+          command: |
+            sudo apt-get update
+            sudo apt-get -y -qq install awscli
+            sudo apt-get install python3-pip
+            sudo pip3 install --upgrade awscli
+      - run:
+          name: Configure AWS
+          command: |
+            aws configure set aws_access_key_id "${AWS_ACCESS_KEY_ID}" 
+            aws configure set aws_secret_access_key "${AWS_SECRET_ACCESS_KEY}" 
+            aws configure set aws_session_token ${AWS_SESSION_TOKEN}"
+      - run:
+          name: Login into ECR and Docker
+          command: |
+            aws ecr get-login-password --region "${AWS_REGION}" | docker login --username AWS --password-stdin "${AWS_ACCOUNT_ID}".dkr.ecr."${AWS_REGION}".amazonaws.com
+      - run:
+          name: Build and tag Image
+          command: |
+            docker build -t "${AWS_ECR_IMAGE_NAME}" .
+            docker tag "${AWS_ECR_REPO_NAME}":"${AWS_ECR_IMAGE_TAG}"  "${AWS_ACCOUNT_ID}".dkr.ecr."{AWS_REGION}".amazonaws.com/"${AWS_ECR_REPO_NAME}":"${AWS_ECR_IMAGE_TAG}"
+      - run:
+          name: Push Image to AWS ECR
+          command: |
+            docker push "${AWS_ACCOUNT_ID}".dkr.ecr."{AWS_REGION}".amazonaws.com/"${AWS_ECR_REPO_NAME}":"${AWS_ECR_IMAGE_TAG}"
+
+
+
 # Orchestrate or schedule a set of jobs
 workflows:
   # Name the workflow "welcome"
-  welcome:
-    # Run the welcome/run job in its own container
-    jobs:
-      - welcome/run
+   build:
+     jobs:
+      - build-and-push-image:
+          filters:
+            branches:
+              only: 
+                - "${GIT_BRANCH}"
