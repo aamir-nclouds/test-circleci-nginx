@@ -27,11 +27,11 @@ jobs:
           name: Build and tag Image
           command: |
             docker build -t "${AWS_ECR_IMAGE_NAME}" .
-            docker tag "${AWS_ECR_REPO_NAME}":"${AWS_ECR_IMAGE_TAG}"  "${AWS_ACCOUNT_ID}".dkr.ecr."{AWS_REGION}".amazonaws.com/"${AWS_ECR_REPO_NAME}":"${AWS_ECR_IMAGE_TAG}"
+            docker tag "${AWS_ECR_IMAGE_NAME}":"${AWS_ECR_IMAGE_TAG}"  "${AWS_ECR_REPO_NAME}":"${AWS_ECR_IMAGE_TAG}"
       - run:
           name: Push Image to AWS ECR
           command: |
-            docker push "${AWS_ACCOUNT_ID}".dkr.ecr."{AWS_REGION}".amazonaws.com/"${AWS_ECR_REPO_NAME}":"${AWS_ECR_IMAGE_TAG}"
+            docker push "${AWS_ECR_REPO_NAME}":"${AWS_ECR_IMAGE_TAG}"
 
 
 # Orchestrate or schedule a set of jobs
