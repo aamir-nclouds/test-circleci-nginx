@@ -2,16 +2,14 @@ version: 2
 jobs:
   build-and-push-image:
     docker:
-      - image: cimg/base:2021.05
+      - image: docker:18.06.1-ce-git
     steps:
       - checkout
       - run:
           name: Install AWS CLI
           command: |
-            sudo apt-get update
-            sudo apt-get -y -qq install awscli
-            sudo apt-get install python3-pip
-            sudo pip3 install --upgrade awscli
+            apk add py-pip
+            pip install awscli
       - setup_remote_docker:
           version: 19.03.13
       - run:
@@ -20,9 +18,7 @@ jobs:
             aws configure set aws_access_key_id "${AWS_ACCESS_KEY_ID}" 
             aws configure set aws_secret_access_key "${AWS_SECRET_ACCESS_KEY}" 
             aws configure set aws_session_token "${AWS_SESSION_TOKEN}"
-            sudo service docker status
-            sudo service docker start
-            
+
       - run:
           name: Login into ECR and Docker
           command: |
