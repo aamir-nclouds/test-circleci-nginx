@@ -22,7 +22,7 @@ jobs:
       - run:
           name: Login into ECR and Docker
           command: |
-            aws ecr get-login-password --region "${AWS_REGION}" | docker login --username AWS --password-stdin "${AWS_ACCOUNT_ID}".dkr.ecr."${AWS_REGION}".amazonaws.com
+            aws ecr get-login-password --region "${AWS_REGION}" | docker login --username AWS --password-stdin "${AWS_ECR_REPO_NAME}"
       - run:
           name: Build and tag Image
           command: |
