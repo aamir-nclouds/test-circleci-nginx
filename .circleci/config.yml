@@ -43,7 +43,7 @@ jobs:
     - run:
         name: Update ECS Service with Updated Task Definition
         command: |
-          aws ecs update-service --cluster "${}" --service "${}" --task-definition "${TASK_DEFINITION_NAME}":$NEW_REVISION
+          aws ecs update-service --cluster "${CLUSTER_NAME}" --service "${SERVICE_NAME}" --task-definition "${TASK_DEFINITION_NAME}":$NEW_REVISION
  
 
 # Orchestrate or schedule a set of jobs
