@@ -1,21 +1,46 @@
 {
-    "memory": "2048",
-    "networkMode": "awsvpc",
-    "family": "nginx-test",
-    "cpu": "1024",
-    "containerDefinitions": [
-        {
-            "memoryReservation": 128,
-            "name": "aamir-nginx-container",
-            "image": "695292474035.dkr.ecr.us-east-1.amazonaws.com/nginx:2e5982c79a40358106656d04542e5ab3feabc53f",
-            "portMappings": [
-                {
-                    "protocol": "tcp",
-                    "containerPort": 80,
-                    "hostPort": 80
-                }
-            ],
-            "essential": true
-        }
-    ]
+    "taskDefinition": {
+        "networkMode": "awsvpc",
+        "family": "nginx-test",
+        "requiresAttributes": [
+            {
+                "name": "com.amazonaws.ecs.capability.ecr-auth"
+            },
+            {
+                "name": "com.amazonaws.ecs.capability.docker-remote-api.1.21"
+            },
+            {
+                "name": "com.amazonaws.ecs.capability.docker-remote-api.1.18"
+            },
+            {
+                "name": "ecs.capability.task-eni"
+            }
+        ],
+        "compatibilities": [
+            "EC2"
+        ],
+        "memory": "2048",
+        "cpu": "1024",
+        "taskExecutionRoleArn": "arn:aws:iam::695292474035:role/ecsTaskExecutionRole",
+        "containerDefinitions": [
+            {
+                "memoryReservation": 128,
+                "environment": [],
+                "name": "aamir-nginx-container",
+                "mountPoints": [],
+                "image": "695292474035.dkr.ecr.us-east-1.amazonaws.com/nginx:2e5982c79a40358106656d04542e5ab3feabc53f",
+                "cpu": 0,
+                "portMappings": [
+                    {
+                        "protocol": "tcp",
+                        "containerPort": 80,
+                        "hostPort": 80
+                    }
+                ],
+                "essential": true,
+                "volumesFrom": []
+            }
+        ],
+        "revision": 4
+    }
 }
