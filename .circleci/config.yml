@@ -27,8 +27,8 @@ jobs:
           name: Build and tag Image
           command: |
             REPO_WITH_TAG=$("${AWS_ECR_IMAGE_NAME}":"${CIRCLE_SHA1}")
-            docker build -t $REPO_WITH_TAG .
-#            docker tag "${AWS_ECR_IMAGE_NAME}":"${AWS_ECR_IMAGE_TAG}"  "${AWS_ECR_REPO_NAME}":"${AWS_ECR_IMAGE_TAG}"
+            docker build -t "${AWS_ECR_IMAGE_NAME}" .
+            docker tag "${AWS_ECR_IMAGE_NAME}" "${AWS_ECR_REPO_NAME}":"${CIRCLE_SHA1}"
       - run:
           name: Push Image to AWS ECR
           command: |
