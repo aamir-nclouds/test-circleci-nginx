@@ -26,6 +26,7 @@ jobs:
       - run:
           name: Build and tag Image
           command: |
+            REPO_WITH_TAG=$("${AWS_ECR_IMAGE_NAME}":"${CIRCLE_SHA1}")
             docker build -t "${AWS_ECR_IMAGE_NAME}":"${CIRCLE_SHA1}" .
 #            docker tag "${AWS_ECR_IMAGE_NAME}":"${AWS_ECR_IMAGE_TAG}"  "${AWS_ECR_REPO_NAME}":"${AWS_ECR_IMAGE_TAG}"
       - run:
@@ -33,17 +34,20 @@ jobs:
           command: |
             docker push "${AWS_ECR_IMAGE_NAME}":"${CIRCLE_SHA1}"
   deploy-to-ecs:
-    - run:
-        name: Update Task Definition
-        command: |
-          TASK_DEFINITION=$(aws ecs describe-task-definition --task-definition "${TASK_DEFINITION_NAME}" --region "${AWS_REGION}")
-          NEW_TASK_DEFINTIION=$(echo $TASK_DEFINITION | jq --arg IMAGE "${AWS_ECR_IMAGE_NAME}":"${CIRCLE_SHA1}" '.taskDefinition | .containerDefinitions[0].image = "${AWS_ECR_IMAGE_NAME}":"${CIRCLE_SHA1}" | del(.taskDefinitionArn) | del(.revision) | del(.status) | del(.requiresAttributes) | del(.compatibilities)')
-          NEW_TASK_INFO=$(aws ecs register-task-definition --region "${AWS_REGION}" --cli-input-json "$NEW_TASK_DEFINTIION")
-          NEW_REVISION=$(echo $NEW_TASK_INFO | jq '.taskDefinition.revision')
-    - run:
-        name: Update ECS Service with Updated Task Definition
-        command: |
-          aws ecs update-service --cluster "${CLUSTER_NAME}" --service "${SERVICE_NAME}" --task-definition "${TASK_DEFINITION_NAME}":$NEW_REVISION
+    docker:
+      - image: $REPO_WITH_TAG
+    steps:
+      - run:
+          name: Update Task Definition
+          command: |
+            TASK_DEFINITION=$(aws ecs describe-task-definition --task-definition "${TASK_DEFINITION_NAME}" --region "${AWS_REGION}")
+            NEW_TASK_DEFINTIION=$(echo $TASK_DEFINITION | jq --arg IMAGE "${AWS_ECR_IMAGE_NAME}":"${CIRCLE_SHA1}" '.taskDefinition | .containerDefinitions[0].image = "${AWS_ECR_IMAGE_NAME}":"${CIRCLE_SHA1}" | del(.taskDefinitionArn) | del(.revision) | del(.status) | del(.requiresAttributes) | del(.compatibilities)')
+            NEW_TASK_INFO=$(aws ecs register-task-definition --region "${AWS_REGION}" --cli-input-json "$NEW_TASK_DEFINTIION")
+            NEW_REVISION=$(echo $NEW_TASK_INFO | jq '.taskDefinition.revision')
+      - run:
+          name: Update ECS Service with Updated Task Definition
+          command: |
+            aws ecs update-service --cluster "${CLUSTER_NAME}" --service "${SERVICE_NAME}" --task-definition "${TASK_DEFINITION_NAME}":$NEW_REVISION
  
 
 # Orchestrate or schedule a set of jobs
