@@ -21,7 +21,7 @@
         ],
         "memory": "2048",
         "cpu": "1024",
-        "taskExecutionRoleArn": "arn:aws:iam::695292474035:role/ecsTaskExecutionRole",
+        "taskRoleArn": "arn:aws:iam::695292474035:role/ecsTaskExecutionRole",
         "containerDefinitions": [
             {
                 "memoryReservation": 128,
