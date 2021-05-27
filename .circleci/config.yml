@@ -29,16 +29,16 @@ jobs:
             docker build -t "${AWS_ECR_IMAGE_NAME}":"${AWS_ECR_IMAGE_TAG}" .
             docker tag "${AWS_ECR_IMAGE_NAME}" "${AWS_ECR_REPO_NAME}":"${CIRCLE_SHA1}"
       - run:
-          name: Create Variable
-          command: |
-            REPO_WITH_TAG=$("${AWS_ECR_REPO_NAME}":"${CIRCLE_SHA1}")
-      - run:
           name: Push Image to AWS ECR
           command: |
             docker push "${AWS_ECR_REPO_NAME}":"${CIRCLE_SHA1}"
+      - run:
+          name: Create Variable
+          command: |
+            REPO_WITH_TAG="${AWS_ECR_REPO_NAME}":"${CIRCLE_SHA1}"
   deploy-to-ecs:
     docker:
-      - image: $REPO_WITH_TAG
+      - image: docker:18.06.1-ce-git
     steps:
       - run:
           name: Update Task Definition
