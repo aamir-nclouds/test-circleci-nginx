@@ -60,3 +60,6 @@ workflows:
           branches:
             only: 
               - master
+    - deploy-to-ecs
+      requires
+        - build-and-push-image
