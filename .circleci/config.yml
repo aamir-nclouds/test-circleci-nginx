@@ -45,7 +45,7 @@ jobs:
           command: |
             apk add py-pip
             pip install awscli
-            apk install -y jq
+            apk add jq
       - setup_remote_docker:
           version: 19.03.13
       - run:
@@ -55,13 +55,21 @@ jobs:
             aws configure set aws_secret_access_key "${AWS_SECRET_ACCESS_KEY}" 
             aws configure set aws_session_token "${AWS_SESSION_TOKEN}"
       - run:
+          name: Create Variable
+          command: |
+            REPO_WITH_TAG="${AWS_ECR_REPO_NAME}":"${CIRCLE_SHA1}"
+      - run:
           name: Update Task Definition
           command: |
-            TASK_DEFINITION=$(aws ecs describe-task-definition --task-definition "${TASK_DEFINITION_NAME}" --region "${AWS_REGION}")
-            echo $TASK_DEFINITION
-            # NEW_TASK_DEFINTIION=$(echo $TASK_DEFINITION | jq --arg IMAGE "${AWS_ECR_IMAGE_NAME}"\':\'"${CIRCLE_SHA1}" '.taskDefinition | .containerDefinitions[0].image = "${AWS_ECR_IMAGE_NAME}":"${CIRCLE_SHA1}" | del(.taskDefinitionArn) | del(.revision) | del(.status) | del(.requiresAttributes) | del(.compatibilities)')
-            # NEW_TASK_INFO=$(aws ecs register-task-definition --region "${AWS_REGION}" --cli-input-json "$NEW_TASK_DEFINTIION")
+            # TASK_DEFINITION=$(aws ecs describe-task-definition --task-definition "${TASK_DEFINITION_NAME}" --region "${AWS_REGION}")
+            # echo $TASK_DEFINITION
+            # NEW_TASK_DEFINTIION=$(echo $TASK_DEFINITION | jq --arg IMAGE "$REPO_WITH_TAG" '.taskDefinition | .containerDefinitions[0].image = $IMAGE ')
+            # NEW_TASK_INFO=$(aws ecs register-task-definition --region "${AWS_REGION}" --cli-input-json "$NEW_TASK_DEFINTIIO ")
             # NEW_REVISION=$(echo $NEW_TASK_INFO | jq '.taskDefinition.revision')
+
+            UPDATED_IMAGE=$(echo task-definition.json | jq --arg IMAGE "$REPO_WITH_TAG" '.taskDefinition | .containerDefinitions[0].image = $IMAGE')
+            REVISION=$(aws ecs register-task-definition --region "${AWS_REGION}" --cli-input-json file://task-definition.json | jq '.taskDefinition.revision')
+            aws ecs update-service --cluster "${CLUSTER_NAME}" --service "${SERVICE_NAME}" --task-definition "${TASK_DEFINITION_NAME}":"${REVISION}" --force-new-deployment
 
 
       # - run:
