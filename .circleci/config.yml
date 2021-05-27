@@ -45,6 +45,7 @@ jobs:
           command: |
             apk add py-pip
             pip install awscli
+            apk install -y jq
       - setup_remote_docker:
           version: 19.03.13
       - run:
