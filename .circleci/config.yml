@@ -41,6 +41,19 @@ jobs:
       - image: docker:18.06.1-ce-git
     steps:
       - run:
+          name: Install AWS CLI
+          command: |
+            apk add py-pip
+            pip install awscli
+      - setup_remote_docker:
+          version: 19.03.13
+      - run:
+          name: Configure AWS
+          command: |
+            aws configure set aws_access_key_id "${AWS_ACCESS_KEY_ID}" 
+            aws configure set aws_secret_access_key "${AWS_SECRET_ACCESS_KEY}" 
+            aws configure set aws_session_token "${AWS_SESSION_TOKEN}"
+      - run:
           name: Update Task Definition
           command: |
             TASK_DEFINITION=$(aws ecs describe-task-definition --task-definition "${TASK_DEFINITION_NAME}" --region "${AWS_REGION}")
